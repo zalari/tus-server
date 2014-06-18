@@ -21,8 +21,8 @@ self.getOffset = function (filepath) {
     }
 };
 
-self.getWriteStream = function (filepath, start, end) {
-    return fs.createWriteStream(filepath,{"start":start,"end":end});
+self.getWriteStream = function (filepath, start) {
+    return fs.createWriteStream(filepath,{"start":start});
 };
 
 module.exports = self;
