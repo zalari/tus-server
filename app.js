@@ -10,7 +10,19 @@ var tusserver = require('./server');
 var CONFIG = require('./config.json');
 
 tusserver.on(tusserver.READY_EVENT,function(){
-   console.log("Locked and loaded!");
+   console.log("Upload-Server ist bereit...");
+});
+
+tusserver.on(tusserver.UPLOAD_COMPLETE_EVENT,function(filename) {
+   console.log("Datei:",filename,"wurde hochgeladen.")
+});
+
+tusserver.on(tusserver.UPLOAD_EVENT,function(filename){
+    console.log("Datei:",filename,"wird gerade hochgeladen...");
+});
+
+tusserver.on(tusserver.UPLOAD_ABORTED,function(filename){
+   console.log("Fehler beim Upload von:",filename);
 });
 
 tusserver.initServer();

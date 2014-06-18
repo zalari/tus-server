@@ -143,7 +143,7 @@ var _processPATCH = function(req, res) {
     });*/
     req.on("end", function() {
         //Transfer ist erfolgreich zu Ende gegangen; also jetzt das Ereignis auslösen
-        console.log("Transfer successfully finished");
+        //console.log("Transfer successfully finished");
         if (!res.headersSent) {
             _httpStatus(res, 200, "Ok");
         }
@@ -151,10 +151,11 @@ var _processPATCH = function(req, res) {
     });
     req.on("close", function() {
         //Transfer wurde von Sender-Seite abgebrochen
-        console.log("Transfer aborted...");
+        //console.log("Transfer aborted...");
         //winston.error("client abort. close the file stream " + fileId);
         //TODO: vielleicht jetzt hier schon ein Rollback machen...?
         writeSteam.end();
+        self.emit(self.UPLOAD_ABORTED,filename);
     });
     /*ws.on("close", function() {
         winston.info("closed the file stream " + fileId);
@@ -162,7 +163,8 @@ var _processPATCH = function(req, res) {
     });*/
     return writeSteam.on("error", function(error) {
         //winston.error("closed the file stream " + fileId + " " + (util.inspect(e)));
-        console.error("closed the file stream " + fileId + " " + (util.inspect(e)));
+        //console.error("closed the file stream " + fileId + " " + (util.inspect(e)));
+        self.emit(self.UPLOAD_ABORTED,filename);
         return _httpStatus(res, 500, "File Error");
     });
 };
