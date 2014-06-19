@@ -1,6 +1,6 @@
 {
   "name": "tus-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "tus.io - compatible express-based upload server with event notification",
   "main": "app.js",
   "scripts": {
