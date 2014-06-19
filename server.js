@@ -202,7 +202,7 @@ self.initServer = function(configObj) {
         _processHEAD(req,res);
     });
 
-    console.log("Starting tus-server on port",self.config.port);
+    console.log("Starting tus-server on: ",self.config.host+':'+self.config.port+self.config.prefixPath);
 
     var server = http.createServer(app);
     server.timeout = 30000;
