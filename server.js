@@ -5,7 +5,8 @@ var http = require("http"),
     events = require("events"),
     fs = require('fs'),
     util = require('util'),
-    path = require('path');
+    path = require('path'),
+    crypto = require('crypto');
 
 var express = require("express"),
     morgan = require("morgan"),
@@ -83,6 +84,10 @@ var _processHEAD = function(req, res) {
 };
 
 var _processPATCH = function(req, res) {
+
+    //FEATURE:checksum
+    var checksum = crypto.createHash('sha1');
+
     //TODO: richtiges logging / Debugging z.B. à la Winston
     //console.log(req.params.filename," needs to be patched...");
     //Fehlerfälle abfangen
@@ -126,6 +131,12 @@ var _processPATCH = function(req, res) {
         //TODO:implement me...
         console.log('error beim Datei erstellen...',error);
     }
+    //Req-pipen...
+    //FEATURE: checksums...
+    req.on("data", function(dataChunk){
+        //console.log("Data........ B4");
+        checksum.update(dataChunk);
+    });
     req.pipe(writeSteam);
     //jetzt hat ein Upload gestartet...
     self.emit(self.UPLOAD_EVENT,filename);
@@ -145,6 +156,8 @@ var _processPATCH = function(req, res) {
         //Transfer ist erfolgreich zu Ende gegangen; also jetzt das Ereignis auslösen
         //console.log("Transfer successfully finished");
         if (!res.headersSent) {
+            var d = checksum.digest('hex');
+            console.log("Checksum (Sha1):",d);
             _httpStatus(res, 200, "Ok");
         }
         self.emit(self.UPLOAD_COMPLETE_EVENT,filename);
