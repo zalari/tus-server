@@ -158,7 +158,7 @@ var _processPATCH = function(req, res) {
         if (!res.headersSent) {
             var d = checksum.digest('hex');
             console.log("Checksum (Sha1):",d);
-            _httpStatus(res, 200, "Ok");
+            _httpStatus(res, 200, "Ok","Entity-Checksum: SHA1 "+d);
         }
         self.emit(self.UPLOAD_COMPLETE_EVENT,filename);
     });
