@@ -2,7 +2,7 @@
   "name": "tus-server",
   "version": "0.1.1",
   "description": "tus.io - compatible express-based upload server with event notification",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

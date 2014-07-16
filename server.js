@@ -1,5 +1,6 @@
 /**
- * Created by chris on 18.06.14.
+ * (c) Christian Ulbrich, Zalari UG (haftungsbeschränkt)
+ * 2014
  */
 var http = require("http"),
     events = require("events"),
@@ -13,8 +14,6 @@ var express = require("express"),
     _ = require('lodash');
 
 var upload = require("./upload");
-
-var CONFIG = require('./config.json');
 
 //setup exprss
 var app = express();

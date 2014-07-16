@@ -25,4 +25,4 @@ tusserver.on(tusserver.UPLOAD_ABORTED,function(filename){
    console.log("Fehler beim Upload von:",filename);
 });
 
-tusserver.initServer();
+tusserver.initServer(CONFIG);
