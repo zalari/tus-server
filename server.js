@@ -1,11 +1,13 @@
 /**
- * Created by chris on 18.06.14.
+ * (c) Christian Ulbrich, Zalari UG (haftungsbeschränkt)
+ * 2014
  */
 var http = require("http"),
     events = require("events"),
     fs = require('fs'),
     util = require('util'),
-    path = require('path');
+    path = require('path'),
+    crypto = require('crypto');
 
 var express = require("express"),
     morgan = require("morgan"),
@@ -13,16 +15,14 @@ var express = require("express"),
 
 var upload = require("./upload");
 
-var CONFIG = require('./config.json');
-
-//Express konfigurieren
+//setup exprss
 var app = express();
 //set up morgan for logging
 var logger = morgan;
 app.use(logger());
 
 
-//Eventbasierter Server...
+//we are event-based...
 var self = new events.EventEmitter();
 
 self.availableEvents = ['ready','upload','uploadComplete','uploadAborted'];
@@ -66,8 +66,10 @@ var _httpStatus = function(res, statusCode, reason, body) {
     return res.end(body);
 };
 
+
+//implementation of HEAD request
 var _processHEAD = function(req, res) {
-    //TODO: richtiges Debug à la Winston ergänzen...
+    //TODO: debugging should be winston-based...
     //console.log(req.params.filename," needs to be headed...");
     //es gibt keine Authentifizierung und es ist auch egal, ob Dateien da sind, oder nicht
     //dadurch wird jeder HEAD-Request positiv beantwortet; also in der Art und Weise,
@@ -82,11 +84,16 @@ var _processHEAD = function(req, res) {
     return _httpStatus(res,200,"OK");
 };
 
+//implementation of PATCH request
 var _processPATCH = function(req, res) {
-    //TODO: richtiges logging / Debugging z.B. à la Winston
+
+    //FEATURE:checksum
+    var checksum = crypto.createHash('sha1');
+
+    //TODO: debugging should be winston-based
     //console.log(req.params.filename," needs to be patched...");
     //Fehlerfälle abfangen
-    //TODO: dafür gibt es doch bestimmt eine schicke Middleware...
+    //TODO: I guess there is some nice request-validation-middleware now for express...
     if (req.headers["content-type"] == null) {
         return _httpStatus(res, 400, "Content-Type Required");
     }
@@ -111,9 +118,9 @@ var _processPATCH = function(req, res) {
         return _httpStatus(res, 400, "Invalid Content-Length");
     }
 
-    //Dateiname bauen
+    //construct final fully qualified file name
     var filename = req.params.filename;
-    //TODO:so absolut ist der Pfad gar nicht unbedingt :)
+    //TODO:this is a potential attack vector for directory traversal
     var absolutePath = path.resolve(self.config.fileUploadPath,filename);
 
     //jetzt kann der Upload beginnen...
@@ -124,10 +131,17 @@ var _processPATCH = function(req, res) {
     }
     catch (error) {
         //TODO:implement me...
-        console.log('error beim Datei erstellen...',error);
+        //console.log('error beim Datei erstellen...',error);
+        throw new Error('Error while creating file...');
     }
+    //Req-pipen...
+    //FEATURE: checksums...
+    req.on("data", function(dataChunk){
+        //console.log("Data........ B4");
+        checksum.update(dataChunk);
+    });
     req.pipe(writeSteam);
-    //jetzt hat ein Upload gestartet...
+    //upload has begun...
     self.emit(self.UPLOAD_EVENT,filename);
     /*req.on("data", function(buffer) {
         winston.debug("old Offset " + info.offset);
@@ -142,18 +156,22 @@ var _processPATCH = function(req, res) {
         }
     });*/
     req.on("end", function() {
-        //Transfer ist erfolgreich zu Ende gegangen; also jetzt das Ereignis auslösen
+        //because we reached the actual of an incoming post-request we can assume, that
+        //the transfer has been successfully finished...
+        //and fire events accordingly
         //console.log("Transfer successfully finished");
         if (!res.headersSent) {
-            _httpStatus(res, 200, "Ok");
+            var d = checksum.digest('hex');
+            console.log("Checksum (Sha1):",d);
+            _httpStatus(res, 200, "Ok","Entity-Checksum: SHA1 "+d);
         }
         self.emit(self.UPLOAD_COMPLETE_EVENT,filename);
     });
     req.on("close", function() {
-        //Transfer wurde von Sender-Seite abgebrochen
+        //transfer has been closed, i.e. interrupted by the client
         //console.log("Transfer aborted...");
         //winston.error("client abort. close the file stream " + fileId);
-        //TODO: vielleicht jetzt hier schon ein Rollback machen...?
+        //TODO: do maybee a server-side rollback of a few bytes?
         writeSteam.end();
         self.emit(self.UPLOAD_ABORTED,filename);
     });
@@ -178,12 +196,12 @@ var _commonHeaders = function(res) {
 };
 
 /**
- * initialisiert den Server mit sinnvollen Defaults...
+ * initializes the server with sane defaults...
  * @param configObj
  */
 self.initServer = function(configObj) {
     self.config = _configure(configObj);
-    //Verzeichnisse einrichten; falls noch nicht vorhanden
+    //create dirs, if they are not existing...
     try {
         fs.mkdirSync(self.config.fileUploadPath);
     }
@@ -193,15 +211,15 @@ self.initServer = function(configObj) {
             process.exit(1);
         }
     }
-    //Routen für Express einrichten und Server starten
-    //wir müssen HEAD und PATCH-Requests unterstützen; dafür Routen definieren...
+    //setup routes for express and start server
+    //we have to process HEAD and PATCH, thus define routes accordingly...
     app.patch(self.config.prefixPath+":filename", function(req,res) {
         _processPATCH(req,res);
     });
     app.head(self.config.prefixPath+":filename", function(req,res) {
         _processHEAD(req,res);
     });
-
+    //TODO:Winston?
     console.log("Starting tus-server on: ",self.config.host+':'+self.config.port+self.config.prefixPath);
 
     var server = http.createServer(app);
@@ -209,13 +227,6 @@ self.initServer = function(configObj) {
     server.listen(self.config.port);
     return self.emit(self.READY_EVENT);
 };
-
-
-/*app.get(CONFIG.prefixPath+":filename", function(req,res) {
-    console.log(req.params.filename," needs to be getted...");
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end("GETTING\n");
-});*/
 
 
 module.exports = self;

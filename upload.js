@@ -1,17 +1,18 @@
 /**
- * Created by chris on 18.06.14.
+ * (c) Christian Ulbrich, Zalari UG (haftungsbeschränkt)
+ * 2014
  */
 var fs = require('fs');
 
 var self = {};
 
 /**
- * liefert den Offset, daher die Dateigröße für eine Datei
- * @param filepath Pfad zur Datei für die die Größe geliefert werden soll
+ * returns the offset, i.e. the file size of a file.
+ * @param filepath fully qualified path to the file, whose offset should be returned
  */
 self.getOffset = function (filepath) {
-    //wenn die Datei nicht vorhanden ist, dann einfach 0 zurück liefern...
-    //TODO: IO-Operationen können Fehler erzeugen...
+    //when the file is not existing, simply return an offset of 0...
+    //TODO: compensate for io-errors...
     if (fs.existsSync(filepath)) {
         //Größe holen
         var stat = fs.statSync(filepath);

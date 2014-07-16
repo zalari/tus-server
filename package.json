@@ -1,14 +1,14 @@
 {
   "name": "tus-server",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "tus.io - compatible express-based upload server with event notification",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.zalari.de:dlr/tus-server.git"
+    "url": "git@github.com:zalari/tus-server.git"
   },
   "keywords": [
     "tus.io",
@@ -17,8 +17,8 @@
     "upload",
     "express"
   ],
-  "author": "Zalari UG (haftungsbeschränkt)",
-  "license": "ISC",
+  "author": "Christian Ulbrich, Zalari UG (haftungsbeschränkt)",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.4.3",
     "morgan": "^1.1.1",

@@ -10,19 +10,19 @@ var tusserver = require('./server');
 var CONFIG = require('./config.json');
 
 tusserver.on(tusserver.READY_EVENT,function(){
-   console.log("Upload-Server ist bereit...");
+   console.log("Upload server is ready...");
 });
 
 tusserver.on(tusserver.UPLOAD_COMPLETE_EVENT,function(filename) {
-   console.log("Datei:",filename,"wurde hochgeladen.")
+   console.log("File:",filename,"was uploaded.")
 });
 
 tusserver.on(tusserver.UPLOAD_EVENT,function(filename){
-    console.log("Datei:",filename,"wird gerade hochgeladen...");
+    console.log("File:",filename,"is currently being uploaded.");
 });
 
 tusserver.on(tusserver.UPLOAD_ABORTED,function(filename){
-   console.log("Fehler beim Upload von:",filename);
+   console.log("Error uploading file:",filename);
 });
 
-tusserver.initServer();
+tusserver.initServer(CONFIG);
