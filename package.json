@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.zalari.de:dlr/tus-server.git"
+    "url": "git@github.com:zalari/tus-server.git"
   },
   "keywords": [
     "tus.io",
@@ -17,8 +17,8 @@
     "upload",
     "express"
   ],
-  "author": "Zalari UG (haftungsbeschränkt)",
-  "license": "ISC",
+  "author": "Christian Ulbrich, Zalari UG (haftungsbeschränkt)",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.4.3",
     "morgan": "^1.1.1",
